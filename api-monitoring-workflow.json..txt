@@ -1,0 +1,238 @@
+{
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "afe1899c-b281-49d8-baec-4b0922c11bf7",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "=https://jsonplaceholder.typicode.com/posts/{{ Math.floor(Math.random() * 100) + 1 }}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        416,
+        0
+      ],
+      "id": "8eadab07-f9be-47cc-9aed-31fdb40af145",
+      "name": "HTTP Request",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1uqAFjEvC8RNcZetRCRjx1DxpJHYe3z45-CP-JVJoUjg",
+          "mode": "list",
+          "cachedResultName": "Новая таблица",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uqAFjEvC8RNcZetRCRjx1DxpJHYe3z45-CP-JVJoUjg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Лист1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uqAFjEvC8RNcZetRCRjx1DxpJHYe3z45-CP-JVJoUjg/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Title": "={{ $json.body.title }}",
+            "Body": "={{ $json.body.body }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Body",
+              "displayName": "Body",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        832,
+        0
+      ],
+      "id": "b4961c35-972b-45cd-a18b-4ef819783a60",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MAWh5pMaz3eedzKO",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            },
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "d9c0551b-2ab9-4ee0-9be3-1bdb6f9f8bc4",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "cc5d0d0b-2054-43ce-ad6c-644d5433ff92",
+              "leftValue": "={{ $json.statusCode }}",
+              "rightValue": 200,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        592,
+        -112
+      ],
+      "id": "1192b251-c3f3-4df7-897b-2dd713621f80",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "sendTo": "max234189@gmail.com",
+        "subject": "🚨 ALERT: API Health Check Failed!",
+        "emailType": "text",
+        "message": "Внимание! Система мониторинга зафиксировала сбой API.  Статус-код ошибки: {{ $json.statusCode }} Сообщение сервера: {{ $json.statusMessage }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        608,
+        96
+      ],
+      "id": "764f6274-652f-4a00-874f-980f2f52bfc0",
+      "name": "Send a message",
+      "webhookId": "9e1042b0-efb3-4f67-8f9d-038fd80d90d5",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "GbkOPZKTZ31y1xio",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        []
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6c749500e158d6044d7a961540113c154c72bb8921343a9c1d8fc8259111460b"
+  }
+}
